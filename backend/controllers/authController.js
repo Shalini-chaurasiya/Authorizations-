@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');   // ✅ REQUIRED
 const UserModel = require('../models/User');
 
-// Signup function
+// ================= SIGNUP =================
 const signup = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Check if user already exists
         const user = await UserModel.findOne({ email });
         if (user) {
             return res.status(409).json({
@@ -15,11 +15,14 @@ const signup = async (req, res) => {
             });
         }
 
-        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Save user
-        const newUser = new UserModel({ name, email, password: hashedPassword });
+        const newUser = new UserModel({
+            name,
+            email,
+            password: hashedPassword
+        });
+
         await newUser.save();
 
         res.status(201).json({
@@ -36,12 +39,11 @@ const signup = async (req, res) => {
     }
 };
 
-// Login function
+// ================= LOGIN =================
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Find user by email
         const user = await UserModel.findOne({ email });
         if (!user) {
             return res.status(401).json({
@@ -50,7 +52,6 @@ const login = async (req, res) => {
             });
         }
 
-        // Compare password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({
@@ -59,10 +60,18 @@ const login = async (req, res) => {
             });
         }
 
-        // Success
+        const jwtToken = jwt.sign(
+            { email: user.email, _id: user._id },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
         res.status(200).json({
             message: "Login successful",
-            success: true
+            success: true,
+            jwtToken,
+            email: user.email,
+            name: user.name
         });
 
     } catch (err) {
@@ -74,5 +83,4 @@ const login = async (req, res) => {
     }
 };
 
-// Export both functions
 module.exports = { signup, login };

@@ -3,10 +3,11 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
+const authRouter = require('./routes/authRouter');
+const productRouter = require('./routes/productRouter');
+
 require('dotenv').config();
 require('./models/db');
-
-const authRouter = require('./routes/authRouter');
 
 const PORT = process.env.PORT || 8080;
 
@@ -17,6 +18,7 @@ app.use(cors());
 // Routes
 app.get('/ping', (req, res) => res.send('PONG'));
 app.use('/auth', authRouter);
+app.use('/products', productRouter);
 
 // Start server
 app.listen(PORT, () => console.log(`Server is running on ${PORT}`));
