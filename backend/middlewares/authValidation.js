@@ -1,5 +1,6 @@
 const Joi = require('joi');
 
+// Signup validation
 const signupValidation = (req, res, next) => {
     const schema = Joi.object({
         name: Joi.string().min(3).max(100).required(),
@@ -9,12 +10,15 @@ const signupValidation = (req, res, next) => {
 
     const { error } = schema.validate(req.body);
     if (error) {
-        return res.status(400).json({ message: "Bad request", error: error.details });
+        return res.status(400).json({
+            message: "Bad request",
+            error: error.details
+        });
     }
-
     next();
 };
 
+// Login validation
 const loginValidation = (req, res, next) => {
     const schema = Joi.object({
         email: Joi.string().email().required(),
@@ -23,10 +27,13 @@ const loginValidation = (req, res, next) => {
 
     const { error } = schema.validate(req.body);
     if (error) {
-        return res.status(400).json({ message: "Bad request", error: error.details });
+        return res.status(400).json({
+            message: "Bad request",
+            error: error.details
+        });
     }
-
     next();
 };
 
+// Export both functions
 module.exports = { signupValidation, loginValidation };
